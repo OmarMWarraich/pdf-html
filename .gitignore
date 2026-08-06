@@ -223,3 +223,6 @@ __marimo__/
 REQS.md
 .github/instructions/workflow-instructions.md
 .github/*instructions.md
+
+tests/fixtures/*.html
+tests/fixtures/*.pdf

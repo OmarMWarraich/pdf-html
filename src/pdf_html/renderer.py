@@ -33,6 +33,30 @@ def _escape(text: str) -> str:
     return html.escape(text, quote=False)
 
 
+# Luminance threshold above which a color is considered "light". PDF slides
+# frequently use white/light text against a dark background image; since this
+# package drops images, that text would disappear on the default light page.
+LIGHT_COLOR_LUMINANCE_THRESHOLD = 0.82
+LIGHT_COLOR_FALLBACK = "#2a2a2a"
+
+
+def _visible_color(color: int) -> str:
+    """Return a CSS #rrggbb string that remains visible on the default light background.
+
+    Colors with a relative luminance above LIGHT_COLOR_LUMINANCE_THRESHOLD are
+    remapped to LIGHT_COLOR_FALLBACK; otherwise the original color is preserved.
+    This is a purely presentational adjustment: the underlying text is unchanged.
+    """
+    rgb = color & 0xFFFFFF
+    r = (rgb >> 16) & 0xFF
+    g = (rgb >> 8) & 0xFF
+    b = rgb & 0xFF
+    luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
+    if luminance > LIGHT_COLOR_LUMINANCE_THRESHOLD:
+        return LIGHT_COLOR_FALLBACK
+    return f"#{rgb:06x}"
+
+
 def _render_run(run: Run, body_size: float, body_color: int) -> str:
     """Render one inline run with semantic tags for its style."""
     text = _escape(run.text)
@@ -47,7 +71,7 @@ def _render_run(run: Run, body_size: float, body_color: int) -> str:
         text = f"<strong>{text}</strong>"
     css: list[str] = []
     if style.color & 0xFFFFFF != body_color & 0xFFFFFF and style.color != 0:
-        css.append(f"color: {style.css_color}")
+        css.append(f"color: {_visible_color(style.color)}")
     if body_size and style.size and abs(style.size - body_size) > 0.5:
         css.append(f"font-size: {style.size / body_size:.2f}em")
     if css:
