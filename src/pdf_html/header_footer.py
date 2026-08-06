@@ -3,6 +3,10 @@
 Removes spans whose bounding box top edge falls within the top 10% of page
 height, or whose bottom edge falls within the bottom 10% of page height, when
 that span text (digits normalized to #) appears on >= 60% of all pages.
+
+Also detects right-hand sidebars that contain legal boilerplate
+(e.g. copyright notices) and removes them so they do not interleave with
+main-column title/body text.
 """
 
 from __future__ import annotations
@@ -25,6 +29,19 @@ MIN_PAGE_OCCURRENCE = 0.60
 # (e.g. a report title sitting in the top band).
 MIN_PAGES_FOR_STRIPPING = 2
 
+# Fraction of page width considered the right-hand sidebar. Spans whose left
+# edge sits to the right of (1 - RIGHT_SIDEBAR_FRACTION) * page_width are
+# sidebar candidates.
+RIGHT_SIDEBAR_FRACTION = 0.28
+
+# Legal boilerplate triggers. If a right sidebar contains any of these,
+# the whole sidebar is treated as page furniture.
+_LEGAL_RE = re.compile(
+    r"COPYRIGHT|ALL RIGHTS RESERVED|NO PART OF THIS|PUBLICATION MAY BE|"
+    r"REPRODUCED|TRANSMITTED|PRIOR WRITTEN PERMISSION|INTERNAL REFERENCE CODE",
+    re.IGNORECASE,
+)
+
 _DIGITS = re.compile(r"\d+")
 
 
@@ -39,6 +56,21 @@ def _is_candidate(span_bbox: tuple[float, float, float, float], page_height: flo
     band = page_height * HEADER_FOOTER_PAGE_FRACTION
     top_edge, bottom_edge = span_bbox[1], span_bbox[3]
     return top_edge <= band or bottom_edge >= page_height - band
+
+
+def _legal_sidebar_spans(page: RawPage) -> set[int]:
+    """Return the object ids of spans that form a right-hand legal sidebar.
+
+    A legal sidebar is a cluster of spans in the right margin whose combined
+    text matches legal boilerplate patterns. Removing these prevents copyright
+    fragments from interleaving with the main title/body column.
+    """
+    threshold = page.width * (1 - RIGHT_SIDEBAR_FRACTION)
+    sidebar = [s for s in page.spans if s.bbox[0] >= threshold]
+    text = "".join(s.text for s in sidebar)
+    if not _LEGAL_RE.search(text):
+        return set()
+    return {id(s) for s in sidebar}
 
 
 def repeated_boilerplate(pages: Sequence[RawPage]) -> set[str]:
@@ -58,20 +90,21 @@ def repeated_boilerplate(pages: Sequence[RawPage]) -> set[str]:
 
 
 def strip_headers_footers(pages: Sequence[RawPage]) -> list[RawPage]:
-    """Return new RawPages with repeated header/footer spans removed."""
+    """Return new RawPages with repeated headers/footers and legal sidebars removed."""
     boilerplate = repeated_boilerplate(pages)
-    if not boilerplate:
-        return list(pages)
     stripped: list[RawPage] = []
     for page in pages:
-        spans = [
-            s
-            for s in page.spans
-            if not (
+        legal_sidebar = _legal_sidebar_spans(page)
+        spans = []
+        for s in page.spans:
+            if id(s) in legal_sidebar:
+                continue
+            if (
                 _is_candidate(s.bbox, page.height)
                 and normalize_text(s.text) in boilerplate
-            )
-        ]
+            ):
+                continue
+            spans.append(s)
         stripped.append(
             RawPage(
                 number=page.number,

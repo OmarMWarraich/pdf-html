@@ -27,6 +27,12 @@ from .ast import (
 DEFAULT_BODY_SIZE_PT = 11.0
 DEFAULT_BODY_FONT = "Georgia, 'Times New Roman', serif"
 
+# Cap auto-derived sizes so presentation-deck fonts do not overwhelm the
+# default light web page. Relative scaling is preserved; only absolute
+# extremes are clamped.
+MAX_BODY_SIZE_PT = 16.0
+MAX_HEADING_SIZES_PT = [22.0, 18.0, 16.0, 14.0]
+
 
 def _escape(text: str) -> str:
     """Escape & < > for HTML text content; text stays verbatim otherwise."""
@@ -125,9 +131,12 @@ def _css(doc: Document, style: str) -> str:
     """Build the single inline stylesheet from the document profile."""
     meta = doc.meta
     if style == "auto" and meta.body_size:
-        body_size = meta.body_size
+        body_size = min(meta.body_size, MAX_BODY_SIZE_PT)
         body_font = f"'{meta.body_font}', serif" if meta.body_font else DEFAULT_BODY_FONT
-        heading_sizes = meta.heading_sizes
+        heading_sizes = [
+            min(size, MAX_HEADING_SIZES_PT[i])
+            for i, size in enumerate(meta.heading_sizes[:4])
+        ]
         palette = meta.palette
     else:
         body_size = DEFAULT_BODY_SIZE_PT

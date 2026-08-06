@@ -8,6 +8,7 @@ import pytest
 from pdf_html.extractor import (
     PyMuPDFExtractor,
     PdfToTextExtractor,
+    _span_text_from_chars,
     style_from_flags,
     FLAG_BOLD,
     FLAG_ITALIC,
@@ -79,3 +80,42 @@ def test_style_from_flags_bits():
 def test_pdftotext_fallback_not_implemented(tmp_path):
     with pytest.raises(NotImplementedError):
         PdfToTextExtractor().extract(str(tmp_path / "x.pdf"))
+
+
+def test_span_text_from_chars_collapses_spaced_glyphs():
+    """Decorative titles with explicit spaces between glyphs are rebuilt."""
+    size = 24.0
+    chars = [
+        {"c": "C", "bbox": (0.0, 0.0, 10.0, 10.0)},
+        {"c": " ", "bbox": (10.0, 0.0, 14.0, 10.0)},
+        {"c": "E", "bbox": (14.0, 0.0, 24.0, 10.0)},
+        {"c": " ", "bbox": (24.0, 0.0, 28.0, 10.0)},
+        {"c": "R", "bbox": (28.0, 0.0, 38.0, 10.0)},
+        {"c": " ", "bbox": (38.0, 0.0, 42.0, 10.0)},
+        {"c": "T", "bbox": (42.0, 0.0, 52.0, 10.0)},
+        {"c": " ", "bbox": (52.0, 0.0, 56.0, 10.0)},
+        {"c": "I", "bbox": (56.0, 0.0, 64.0, 10.0)},
+        {"c": " ", "bbox": (64.0, 0.0, 68.0, 10.0)},
+        {"c": "F", "bbox": (68.0, 0.0, 78.0, 10.0)},
+        {"c": " ", "bbox": (78.0, 0.0, 92.0, 10.0)},  # larger word gap
+        {"c": "I", "bbox": (92.0, 0.0, 100.0, 10.0)},
+    ]
+    assert _span_text_from_chars(chars, size) == "CERTIF I"
+
+
+def test_span_text_from_chars_preserves_normal_text():
+    """Regular spans without decorative spacing are left untouched."""
+    chars = [
+        {"c": "H", "bbox": (0.0, 0.0, 8.0, 10.0)},
+        {"c": "e", "bbox": (8.0, 0.0, 14.0, 10.0)},
+        {"c": "l", "bbox": (14.0, 0.0, 18.0, 10.0)},
+        {"c": "l", "bbox": (18.0, 0.0, 22.0, 10.0)},
+        {"c": "o", "bbox": (22.0, 0.0, 28.0, 10.0)},
+        {"c": " ", "bbox": (28.0, 0.0, 32.0, 10.0)},
+        {"c": "w", "bbox": (32.0, 0.0, 40.0, 10.0)},
+        {"c": "o", "bbox": (40.0, 0.0, 46.0, 10.0)},
+        {"c": "r", "bbox": (46.0, 0.0, 50.0, 10.0)},
+        {"c": "l", "bbox": (50.0, 0.0, 54.0, 10.0)},
+        {"c": "d", "bbox": (54.0, 0.0, 60.0, 10.0)},
+    ]
+    assert _span_text_from_chars(chars, 12.0) == "Hello world"
