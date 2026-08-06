@@ -58,12 +58,20 @@ def _size_histogram(pages: Sequence[RawPage]) -> Counter[float]:
 
 
 def _merge_tiers(sizes: Sequence[float]) -> list[float]:
-    """Merge sizes within SIZE_TIER_MERGE_EPSILON_PT into single tiers."""
+    """Merge sizes within SIZE_TIER_MERGE_EPSILON_PT into single tiers.
+
+    Comparison is against the smallest member absorbed into the current
+    tier (not the tier's first/largest member), so a run like 16.4, 16.0
+    stays one tier while a genuinely smaller size starts a new one.
+    """
     tiers: list[float] = []
+    floor: list[float] = []
     for size in sorted(sizes, reverse=True):
-        if tiers and tiers[-1] - size <= SIZE_TIER_MERGE_EPSILON_PT:
+        if floor and floor[-1] - size <= SIZE_TIER_MERGE_EPSILON_PT:
+            floor[-1] = size  # extend the current tier downward
             continue
         tiers.append(size)
+        floor.append(size)
     return tiers
 
 

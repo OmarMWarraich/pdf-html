@@ -20,10 +20,10 @@ HEADER_FOOTER_PAGE_FRACTION = 0.10
 # least this fraction of all pages.
 MIN_PAGE_OCCURRENCE = 0.60
 
-# Repetition is only meaningful across several pages; below this count the
-# "repeated on >= 60% of pages" rule would fire on any single page's real
-# content (e.g. a report title sitting in the top band).
-MIN_PAGES_FOR_STRIPPING = 3
+# Repetition is only meaningful when a document has more than one page;
+# for a single page the ">= 60% of pages" rule would fire on real content
+# (e.g. a report title sitting in the top band).
+MIN_PAGES_FOR_STRIPPING = 2
 
 _DIGITS = re.compile(r"\d+")
 
