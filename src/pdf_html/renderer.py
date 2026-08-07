@@ -31,7 +31,7 @@ DEFAULT_BODY_FONT = "Georgia, 'Times New Roman', serif"
 # default light web page. Relative scaling is preserved; only absolute
 # extremes are clamped.
 MAX_BODY_SIZE_PT = 16.0
-MAX_HEADING_SIZES_PT = [22.0, 18.0, 16.0, 14.0]
+MAX_HEADING_SIZES_PT = [20.0, 16.0, 14.0, 12.0]
 
 
 def _escape(text: str) -> str:
@@ -85,8 +85,23 @@ def _render_run(run: Run, body_size: float, body_color: int) -> str:
     return text
 
 
+# When the horizontal gap between two consecutive runs on the same line
+# exceeds this fraction of the larger font size, insert a space so that
+# separate text boxes (e.g. a section number and a heading) do not merge.
+RUN_GAP_SPACE_THRESHOLD = 0.25
+
+
 def _render_runs(runs: Sequence[Run], body_size: float, body_color: int) -> str:
-    return "".join(_render_run(r, body_size, body_color) for r in runs)
+    parts: list[str] = []
+    for i, run in enumerate(runs):
+        if i > 0:
+            prev = runs[i - 1]
+            gap = run.bbox[0] - prev.bbox[2]
+            threshold = max(run.style.size, prev.style.size) * RUN_GAP_SPACE_THRESHOLD
+            if gap > threshold:
+                parts.append(" ")
+        parts.append(_render_run(run, body_size, body_color))
+    return "".join(parts)
 
 
 def _render_list(block: ListBlock, body_size: float, body_color: int) -> str:

@@ -26,6 +26,17 @@ HEADING_MAX_CHARS = 120
 # Alignment cue tolerance (points) for comparing left/right edges.
 ALIGN_TOLERANCE_PT = 6.0
 
+# Within a single visual line, consecutive spans separated horizontally by
+# more than this multiple of the line height are treated as separate lines.
+# This prevents slide titles and right-aligned descriptions from merging.
+SAME_LINE_HORIZONTAL_SPLIT_THRESHOLD = 2.0
+
+# When merging lines into a paragraph, require that the next line horizontally
+# overlap the accumulated paragraph by at least this fraction of the shorter
+# of the two widths. This prevents side-by-side cards (e.g. slide grids) from
+# collapsing into a single paragraph.
+PARAGRAPH_HORIZONTAL_OVERLAP_FRACTION = 0.15
+
 
 @dataclass
 class Line:
@@ -67,7 +78,12 @@ class Line:
 
 
 def group_lines(spans: Sequence[Span]) -> list[Line]:
-    """Group already-ordered spans into visual lines by y-overlap."""
+    """Group already-ordered spans into visual lines by y-overlap.
+
+    Within a line, spans that are far apart horizontally are split into
+    separate lines so that slide layouts (e.g. a title plus a right-aligned
+    description) do not collapse into a single paragraph.
+    """
     lines: list[Line] = []
     for span in spans:
         if (
@@ -77,9 +93,20 @@ def group_lines(spans: Sequence[Span]) -> list[Line]:
             lines[-1].spans.append(span)
         else:
             lines.append(Line(spans=[span]))
+
+    result: list[Line] = []
     for line in lines:
         line.spans.sort(key=lambda s: s.bbox[0])
-    return lines
+        split_lines: list[Line] = [Line(spans=[line.spans[0]])]
+        for span in line.spans[1:]:
+            prev = split_lines[-1].spans[-1]
+            gap = span.bbox[0] - prev.bbox[2]
+            if gap > line.height * SAME_LINE_HORIZONTAL_SPLIT_THRESHOLD:
+                split_lines.append(Line(spans=[span]))
+            else:
+                split_lines[-1].spans.append(span)
+        result.extend(split_lines)
+    return result
 
 
 def is_heading(line: Line, profile: StyleProfile) -> int | None:
@@ -154,6 +181,12 @@ def classify_page(page: RawPage, profile: StyleProfile) -> list[Block]:
             prev_line = line
             continue
 
+        def _horizontal_overlap(a: Line, b: Line) -> float:
+            """Overlap fraction relative to the shorter line width."""
+            overlap = min(a.x1, b.x1) - max(a.x0, b.x0)
+            short = min(a.x1 - a.x0, b.x1 - b.x0)
+            return overlap / short if short > 0 else 0.0
+
         gap_ok = (
             prev_line is not None
             and (line.y0 - prev_line.y1) < prev_line.height * (PARAGRAPH_GAP_MULTIPLIER - 1.0) + prev_line.height * 0.4
@@ -162,7 +195,7 @@ def classify_page(page: RawPage, profile: StyleProfile) -> list[Block]:
             prev_line is not None
             and abs(line.max_size - prev_line.max_size) <= 0.5
         )
-        if current is not None and gap_ok and same_style:
+        if current is not None and gap_ok and same_style and _horizontal_overlap(prev_line, line) >= PARAGRAPH_HORIZONTAL_OVERLAP_FRACTION:
             current.runs.extend(line.spans)
         else:
             flush()

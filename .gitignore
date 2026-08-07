@@ -226,3 +226,4 @@ REQS.md
 
 tests/fixtures/*.html
 tests/fixtures/*.pdf
+chain*

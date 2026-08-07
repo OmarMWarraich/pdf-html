@@ -9,7 +9,8 @@ from pdf_html.ast import Heading, ListBlock, Paragraph
 from pdf_html.extractor import PyMuPDFExtractor
 from pdf_html.list_parser import is_list_item, parse_lists, strip_marker
 from pdf_html.ast import Span, SpanStyle
-from pdf_html.structure import classify_document
+from pdf_html.renderer import _render_runs
+from pdf_html.structure import classify_document, group_lines
 from pdf_html.style_profiler import profile_styles
 
 
@@ -76,3 +77,32 @@ def test_strip_marker_keeps_text_verbatim():
     runs = [Span(text="• Buy milk & eggs", bbox=(0, 0, 10, 10), style=style)]
     strip_marker(runs, "•")
     assert "".join(r.text for r in runs) == "Buy milk & eggs"
+
+
+def test_group_lines_splits_wide_horizontal_gaps():
+    """Spans far apart on the same y-level become separate lines."""
+    style = SpanStyle(font="Helvetica", size=18.0, bold=True)
+    spans = [
+        Span(text="4.1", bbox=(50, 200, 80, 220), style=style),
+        Span(text="The Title", bbox=(100, 200, 360, 220), style=style),
+        Span(
+            text="Right description",
+            bbox=(440, 200, 620, 220),
+            style=SpanStyle(font="Helvetica", size=16.0),
+        ),
+    ]
+    lines = group_lines(spans)
+    assert len(lines) == 2
+    assert lines[0].text == "4.1The Title"
+    assert lines[1].text == "Right description"
+
+
+def test_render_runs_inserts_space_between_distant_runs():
+    """A gap between runs wider than the threshold produces a space in HTML."""
+    style = SpanStyle(font="Helvetica", size=18.0, bold=True)
+    runs = [
+        Span(text="4.1", bbox=(50, 200, 80, 220), style=style),
+        Span(text="The Title", bbox=(100, 200, 360, 220), style=style),
+    ]
+    html = _render_runs(runs, body_size=18.0, body_color=0)
+    assert "</strong> <strong>" in html
