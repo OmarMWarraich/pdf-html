@@ -6,6 +6,8 @@
 
 **Early-stage geometry-first PDF → HTML converter for text-based PDFs — verbatim text, source typography, zero images.**
 
+[![PyPI](https://img.shields.io/pypi/v/pdf-html?logo=pypi&logoColor=white)](https://pypi.org/project/pdf-html/)
+[![Publish](https://github.com/OmarMWarraich/pdf-html/actions/workflows/publish.yml/badge.svg)](https://github.com/OmarMWarraich/pdf-html/actions/workflows/publish.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyMuPDF](https://img.shields.io/badge/powered%20by-PyMuPDF-orange)](https://pymupdf.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](#-license)
@@ -21,7 +23,7 @@
 
 ## 🎯 What it does
 
-`pdf-html` is an **early-stage, geometry-first PDF-to-HTML converter** for **text-based PDFs**. It rebuilds the document as a **single self-contained HTML5 file** that mirrors the source document's look and structure:
+`pdf-html` is an **early-stage, geometry-first Python CLI** that converts **text-based PDFs** into a **single self-contained HTML file**. Instead of NLP or OCR, it infers document structure purely from font metadata and bounding-box geometry — rebuilding heading hierarchies, nested lists, ruled tables (including rows that span page breaks), and multi-column reading order, while keeping every character of text verbatim. The output mirrors the source document's typography with CSS derived from its own fonts, sizes, and colors, and never embeds images. Deterministic, offline, MIT-licensed, and installable with `pip install pdf-html`.
 
 - ✅ Best for: text-based PDFs with real text layers, headings, lists, tables, and multi-column layouts
 - ⚠️ Not a universal OCR-first converter: scanned/image-heavy PDFs still need an OCR pre-pass or a dedicated workflow
@@ -219,6 +221,8 @@ pdf-html/
 │   ├── list_parser.py          # nested list folding
 │   ├── ast.py                  # typed document model
 │   └── renderer.py             # semantic HTML5 + derived CSS
+├── .github/workflows/
+│   └── publish.yml             # CI: test → build → publish to PyPI on release
 ├── tests/                      # 56 tests + deterministic PDF fixtures
 ├── README.md
 └── TUTORIAL.md                 # step-by-step usage guide
@@ -248,11 +252,19 @@ Contributions welcome! Ground rules:
 
 This project is intentionally published as an **early-stage v0.x** tool: the core pipeline is solid for text-based PDFs, but it is not a universal PDF converter for scanned pages, forms, or OCR-heavy corpora.
 
+Releases are automated with GitHub Actions and [PyPI trusted publishing](https://docs.pypi.org/trusted-publishers/) — no API tokens involved. Publishing a GitHub release triggers [publish.yml](.github/workflows/publish.yml), which runs the test suite, builds the sdist + wheel, and uploads to PyPI:
+
 ```bash
-# 1. bump version in pyproject.toml
-uv build        # 2. artifacts land in dist/
-uv publish      # 3. push to PyPI (or twine upload dist/*)
+# 1. bump version in pyproject.toml and src/pdf_html/__init__.py
+# 2. commit, tag, and push
+git tag -a vX.Y.Z -m "Release vX.Y.Z"
+git push origin main --tags
+
+# 3. publish the GitHub release — this triggers CI → tests → build → PyPI
+gh release create vX.Y.Z --generate-notes
 ```
+
+Manual fallback: `uv build && twine upload dist/*`.
 
 ## 📄 License
 
