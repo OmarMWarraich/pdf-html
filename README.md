@@ -147,6 +147,25 @@ The hardest part of PDF → HTML is tables. `pdf-html`:
 | 🪂 **Graceful degradation** | Heuristic failures only affect styling — never text content or order |
 | 🔧 **Tunable & testable** | Every heuristic threshold is a named module-level constant with focused unit tests |
 
+## ⚖️ How it compares
+
+Every PDF converter picks a trade-off. `pdf-html` optimizes for **semantic, reflowable, styled HTML with a verbatim-text guarantee** — a square none of the established tools occupy:
+
+| Tool | Output | Semantic structure | Keeps typography | Deterministic | Footprint |
+|---|---|:---:|:---:|:---:|---|
+| **pdf-html** | Self-contained HTML5 | ✅ `h1–h6`, `ul/ol`, `table` | ✅ CSS derived from the source | ✅ | ~30 MB (PyMuPDF only) |
+| [pdf2htmlEX](https://github.com/pdf2htmlEX/pdf2htmlEX) | Pixel-faithful HTML | ❌ positioned glyphs | ✅ visually | ✅ | C++ toolchain |
+| [Poppler pdftohtml](https://poppler.freedesktop.org/) | Positioned divs / bare text | ❌ | ⚠️ partial | ✅ | system package |
+| [pymupdf4llm](https://pypi.org/project/pymupdf4llm/) | Markdown for LLM ingestion | ⚠️ headings & lists | ❌ discarded | ✅ | ~30 MB |
+| [marker-pdf](https://pypi.org/project/marker-pdf/) | Markdown/JSON via ML | ✅ | ❌ discarded | ❌ model-dependent | GB-scale models, GPU-friendly |
+| [docling](https://pypi.org/project/docling/) | Markdown/HTML/JSON via ML | ✅ | ❌ discarded | ❌ model-dependent | GB-scale models |
+| [unstructured](https://pypi.org/project/unstructured/) | Element JSON for RAG | ⚠️ element types | ❌ | ⚠️ | heavy optional deps |
+| Adobe PDF Services | Structured JSON/HTML | ✅ | ⚠️ | ❌ | cloud API, paid |
+
+**When to choose pdf-html** — you want a *readable, reflowable* document that still looks like the original, produced offline, reproducibly, with text you can trust character-for-character (tables included, even across page breaks).
+
+**When to choose something else** — you need pixel-perfect visual replicas (pdf2htmlEX), scanned-document OCR and formula recognition (marker, docling), or RAG-oriented element JSON (unstructured).
+
 ## 🧪 Testing
 
 56 tests cover every pipeline stage plus end-to-end CLI runs over deterministic fixture PDFs
