@@ -37,7 +37,7 @@
 uv pip install .        # or: pip install .
 
 # convert
-pdf2html report.pdf -o report.html
+pdf-html report.pdf -o report.html
 
 # open report.html in any browser — no external assets needed
 ```
@@ -45,7 +45,7 @@ pdf2html report.pdf -o report.html
 ## 🖥️ CLI reference
 
 ```bash
-pdf2html INPUT.pdf -o out.html [--extractor pymupdf|pdftotext]
+pdf-html INPUT.pdf -o out.html [--extractor pymupdf|pdftotext]
     [--style auto|default] [--paginate] [--no-tables] [--no-callouts]
     [--keep-headers] [--allow-scanned]
 ```

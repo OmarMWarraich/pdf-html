@@ -1,6 +1,6 @@
 """Command-line interface.
 
-pdf2html INPUT.pdf -o out.html [--extractor pymupdf|pdftotext]
+pdf-html INPUT.pdf -o out.html [--extractor pymupdf|pdftotext]
     [--style auto|default] [--paginate] [--no-tables] [--no-callouts]
     [--keep-headers] [--allow-scanned]
 """
@@ -24,7 +24,7 @@ EXIT_SCANNED = 2
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="pdf2html",
+        prog="pdf-html",
         description=(
             "Convert a text-based PDF into a single self-contained HTML file. "
             "Text is verbatim; images are dropped; style is inferred from "

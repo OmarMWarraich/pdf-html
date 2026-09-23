@@ -15,13 +15,13 @@ pip install .
 Verify the install:
 
 ```bash
-pdf2html --help
+pdf-html --help
 ```
 
 ## 2. Convert your first PDF
 
 ```bash
-pdf2html my-document.pdf -o my-document.html
+pdf-html my-document.pdf -o my-document.html
 ```
 
 Open `my-document.html` in any browser. The output is a single self-contained
@@ -35,26 +35,26 @@ bullet lists inside cells and rows that continue across page breaks.
 Use the built-in theme instead of the document's own style:
 
 ```bash
-pdf2html my-document.pdf -o out.html --style default
+pdf-html my-document.pdf -o out.html --style default
 ```
 
 Keep repeated running headers/footers:
 
 ```bash
-pdf2html my-document.pdf -o out.html --keep-headers
+pdf-html my-document.pdf -o out.html --keep-headers
 ```
 
 Preserve page boundaries as `<section class="sheet">` wrappers:
 
 ```bash
-pdf2html my-document.pdf -o out.html --paginate
+pdf-html my-document.pdf -o out.html --paginate
 ```
 
 Ruled tables are reconstructed as `<table>` elements by default — no flag
 needed. To compare against the old flat output, disable them:
 
 ```bash
-pdf2html my-document.pdf -o out.html --no-tables
+pdf-html my-document.pdf -o out.html --no-tables
 ```
 
 ## 4. Real examples
@@ -62,9 +62,9 @@ pdf2html my-document.pdf -o out.html --no-tables
 Convert the bundled fixture documents (after `uv sync`):
 
 ```bash
-uv run pdf2html tests/fixtures/report.pdf -o /tmp/report.html
-uv run pdf2html tests/fixtures/two_column.pdf -o /tmp/two_column.html
-uv run pdf2html tests/fixtures/table.pdf -o /tmp/table.html
+uv run pdf-html tests/fixtures/report.pdf -o /tmp/report.html
+uv run pdf-html tests/fixtures/two_column.pdf -o /tmp/two_column.html
+uv run pdf-html tests/fixtures/table.pdf -o /tmp/table.html
 ```
 
 ## 5. Troubleshooting
