@@ -138,15 +138,18 @@ def _paragraph_align(line: Line, page_width: float) -> str:
     return "left"
 
 
-def classify_page(page: RawPage, profile: StyleProfile) -> list[Block]:
+def classify_page(
+    page: RawPage, profile: StyleProfile, *, single_column: bool = False
+) -> list[Block]:
     """Turn one page of raw spans into structured blocks.
 
     Headings, paragraphs, and list items are handled here; tables and
     callouts are detected by their own modules (planned). List items are
     emitted as Paragraph blocks marked by list_parser.parse_lists afterwards.
+    *single_column* skips column detection (table cells).
     """
     blocks: list[Block] = []
-    lines = group_lines(order_spans(page))
+    lines = group_lines(order_spans(page, single_column=single_column))
     current: Paragraph | None = None
 
     def flush() -> None:
@@ -177,7 +180,7 @@ def classify_page(page: RawPage, profile: StyleProfile) -> list[Block]:
             para = Paragraph(runs=runs)
             para.align = "list"  # resolved into ListBlocks by list_parser
             para.marker = marker.group(1)  # type: ignore[attr-defined]
-            blocks.append(para)
+            current = para  # wrapped continuation lines merge into the item
             prev_line = line
             continue
 

@@ -73,8 +73,15 @@ class ListBlock:
 
 
 @dataclass
+class TableCell:
+    """One table cell; holds fully classified blocks (paragraphs, lists, ...)."""
+
+    blocks: list["Block"] = field(default_factory=list)
+
+
+@dataclass
 class TableBlock:
-    rows: list[list[str]] = field(default_factory=list)
+    rows: list[list[TableCell]] = field(default_factory=list)
     header_rows: int = 0
 
 

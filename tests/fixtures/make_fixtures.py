@@ -2,12 +2,14 @@
 
 Run:  uv run python tests/fixtures/make_fixtures.py
 
-Produces four fixtures per REQS.md §8:
+Produces the fixtures per REQS.md §8:
   report.pdf      — multi-page report: running header/footer, h1/h2 headings,
                     body paragraphs, nested bullet + ordered lists.
   two_column.pdf  — two-column layout to exercise reading-order clustering.
   slides.pdf      — landscape slide deck: big titles, sparse bullets.
   brochure.pdf    — single-page marketing layout: colors, centered text.
+  table.pdf       — ruled 2-column table (bold header row, bullets inside a
+                    cell) with flow text before and after it.
 
 EXPECTED_TEXT holds the exact strings drawn into each fixture so tests can
 verify verbatim output. Every string uses explicit fonts and sizes so the
@@ -68,6 +70,13 @@ EXPECTED_TEXT: dict[str, list[str]] = {
     ],
     "brochure.pdf": [
         "Acme Widgets", "Quality you can trust", "Visit us today",
+    ],
+    "table.pdf": [
+        "Course Outline", "Topic", "Outcomes",
+        "Topic 1: Threats", "Learning outcomes:",
+        "Define common threats.", "Classify threats by impact.",
+        "Topic 2: Crypto", "Apply symmetric ciphers.",
+        "Text after the table.",
     ],
 }
 
@@ -146,11 +155,33 @@ def make_brochure(path: Path) -> None:
     c.save()
 
 
+def make_table(path: Path) -> None:
+    c = canvas.Canvas(str(path), pagesize=A4)
+    _draw(c, 72, 80, "Course Outline", "Helvetica-Bold", 16)
+    # Ruled 2-column grid: header row + two body rows.
+    tops = [110, 135, 200, 250]  # row edges, from page top
+    xs = [72, 250, 520]
+    c.setLineWidth(0.7)
+    c.grid(xs, [_y(c, t) for t in tops])
+    _draw(c, 78, 127, "Topic", "Helvetica-Bold", 11)
+    _draw(c, 256, 127, "Outcomes", "Helvetica-Bold", 11)
+    _draw(c, 78, 152, "Topic 1: Threats", "Helvetica", 11)
+    _draw(c, 256, 152, "Learning outcomes:", "Helvetica-Bold", 11)
+    _draw(c, 256, 168, "• Define common threats.", "Helvetica", 11)
+    _draw(c, 256, 184, "• Classify threats by impact.", "Helvetica", 11)
+    _draw(c, 78, 217, "Topic 2: Crypto", "Helvetica", 11)
+    _draw(c, 256, 217, "• Apply symmetric ciphers.", "Helvetica", 11)
+    _draw(c, 72, 290, "Text after the table.", "Helvetica", 11)
+    c.showPage()
+    c.save()
+
+
 GENERATORS = {
     "report.pdf": make_report,
     "two_column.pdf": make_two_column,
     "slides.pdf": make_slides,
     "brochure.pdf": make_brochure,
+    "table.pdf": make_table,
 }
 
 
