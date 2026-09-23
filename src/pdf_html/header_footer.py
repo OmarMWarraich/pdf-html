@@ -111,6 +111,7 @@ def strip_headers_footers(pages: Sequence[RawPage]) -> list[RawPage]:
                 width=page.width,
                 height=page.height,
                 spans=spans,
+                tables=page.tables,
             )
         )
     return stripped

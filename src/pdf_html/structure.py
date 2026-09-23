@@ -198,7 +198,7 @@ def classify_page(
             prev_line is not None
             and abs(line.max_size - prev_line.max_size) <= 0.5
         )
-        if current is not None and gap_ok and same_style and _horizontal_overlap(prev_line, line) >= PARAGRAPH_HORIZONTAL_OVERLAP_FRACTION:
+        if current is not None and gap_ok and same_style and _horizontal_overlap(prev_line, line) >= PARAGRAPH_HORIZONTAL_OVERLAP_FRACTION: # type: ignore
             current.runs.extend(line.spans)
         else:
             flush()

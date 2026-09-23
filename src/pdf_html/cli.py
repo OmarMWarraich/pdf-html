@@ -11,12 +11,12 @@ import argparse
 import sys
 from collections.abc import Sequence
 
+from .ast import Document, DocumentMeta, Page
 from .extractor import PdfToTextExtractor, PyMuPDFExtractor, TextExtractor
 from .header_footer import strip_headers_footers
-from .list_parser import parse_lists
 from .renderer import render_html
-from .structure import classify_document
 from .style_profiler import profile_styles
+from .table_reconstructor import merge_continuation_tables, reconstruct_page
 
 EXIT_OK = 0
 EXIT_SCANNED = 2
@@ -79,10 +79,8 @@ def _extractor(name: str) -> TextExtractor:
     return PyMuPDFExtractor()
 
 
-def convert(args: argparse.Namespace) -> "Document":
+def convert(args: argparse.Namespace) -> Document:
     """Run the full pipeline for parsed CLI args and return the AST."""
-    from .ast import Document, DocumentMeta, Page
-
     result = _extractor(args.extractor).extract(args.input)
 
     if result.scanned_pages and not args.allow_scanned:
@@ -109,13 +107,15 @@ def convert(args: argparse.Namespace) -> "Document":
         ),
         scanned_pages=list(result.scanned_pages),
     )
-    for raw, blocks in zip(pages, classify_document(pages, profile), strict=True):
+    pages_blocks = [reconstruct_page(raw, profile) for raw in pages]
+    merge_continuation_tables(pages_blocks)
+    for raw, blocks in zip(pages, pages_blocks, strict=True):
         doc.pages.append(
             Page(
                 number=raw.number,
                 width=raw.width,
                 height=raw.height,
-                blocks=parse_lists(blocks),
+                blocks=blocks,
             )
         )
     return doc

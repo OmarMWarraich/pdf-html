@@ -103,21 +103,26 @@ def _column_of(bbox: BBox, edges: Sequence[float]) -> int:
     return idx
 
 
-def order_spans(page: RawPage) -> list[Span]:
+def order_spans(page: RawPage, *, single_column: bool = False) -> list[Span]:
     """Return spans in reading order: column-major, then top-to-bottom.
 
     Within a column, spans are sorted by vertical position; spans sharing a
-    line (y overlap within tolerance) are ordered left to right.
+    line (y overlap within tolerance) are ordered left to right. With
+    *single_column* the column detection is skipped entirely — used for
+    narrow regions such as table cells where gaps never mean columns.
     """
     if not page.spans:
         return []
-    edges = _column_edges(page.spans, page.width)
-    # If the global column detector sees only one column but the page also
-    # contains a card-style grid, fall back to card-based edges.
-    if len(edges) == 1:
-        card_edges = _card_column_edges(page.spans, page.width)
-        if len(card_edges) > 1:
-            edges = card_edges
+    if single_column:
+        edges: list[float] = [0.0]
+    else:
+        edges = _column_edges(page.spans, page.width)
+        # If the global column detector sees only one column but the page also
+        # contains a card-style grid, fall back to card-based edges.
+        if len(edges) == 1:
+            card_edges = _card_column_edges(page.spans, page.width)
+            if len(card_edges) > 1:
+                edges = card_edges
 
     def key(span: Span) -> tuple[int, float, float]:
         col = _column_of(span.bbox, edges)

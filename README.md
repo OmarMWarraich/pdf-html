@@ -8,6 +8,11 @@ text **verbatim** and **dropping all images**. Structure is inferred
 deterministically from font metadata and geometry (font size, weight, style,
 color, bounding boxes); there is no NLP and no LLM in the core.
 
+Ruled tables are detected with PyMuPDF's `find_tables()` and rebuilt as real
+`<table>` elements: cell content keeps its inline styling, bullet lists inside
+cells become nested `<ul>`/`<ol>`, bold-only first rows become `<th>` header
+rows, and rows that continue across a page break are merged back into one row.
+
 ## Installation
 
 Requires Python 3.10+.
@@ -58,8 +63,8 @@ Feature-based commits (one commit = one feature or fix), message format
 uv run pytest
 ```
 
-Fixture PDFs (report, two-column paper, slide deck, brochure) live under
-tests/fixtures/ and are generated deterministically:
+Fixture PDFs (report, two-column paper, slide deck, brochure, ruled table)
+live under tests/fixtures/ and are generated deterministically:
 
 ```bash
 uv run python tests/fixtures/make_fixtures.py

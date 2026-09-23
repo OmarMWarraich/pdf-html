@@ -39,6 +39,16 @@ FLAG_BOLD = 16
 
 
 @dataclass
+class TableRegion:
+    """A table detected on a page: outer bbox plus per-cell bboxes by row."""
+
+    bbox: BBox
+    rows: list[list[BBox | None]] = field(default_factory=list)  # None = merged cell
+    # Detector hint: 1 when the first row of `rows` is a header row.
+    header_rows: int = 0
+
+
+@dataclass
 class RawPage:
     """Spans extracted from one page, before reading-order analysis."""
 
@@ -46,6 +56,7 @@ class RawPage:
     width: float
     height: float
     spans: list[Span] = field(default_factory=list)
+    tables: list[TableRegion] = field(default_factory=list)
 
 
 @dataclass
@@ -162,9 +173,31 @@ class PyMuPDFExtractor(TextExtractor):
                         width=page.rect.width,
                         height=page.rect.height,
                         spans=spans,
+                        tables=self._table_regions(page) if spans else [],
                     )
                 )
         return result
+
+    @staticmethod
+    def _table_regions(page: pymupdf.Page) -> list[TableRegion]:
+        """Detect tables with Page.find_tables() and record their geometry."""
+        regions: list[TableRegion] = []
+        for table in page.find_tables().tables:
+            rows: list[list[BBox | None]] = [
+                [tuple(cell) if cell is not None else None for cell in row.cells]
+                for row in table.rows
+            ]
+            rows = [row for row in rows if any(c is not None for c in row)]
+            if not rows:
+                continue
+            regions.append(
+                TableRegion(
+                    bbox=tuple(table.bbox),
+                    rows=rows,
+                    header_rows=0 if table.header.external else 1,
+                )
+            )
+        return regions
 
     @staticmethod
     def _image_rects(page: pymupdf.Page) -> list[pymupdf.Rect]:

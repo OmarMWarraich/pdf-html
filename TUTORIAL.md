@@ -27,7 +27,8 @@ pdf2html my-document.pdf -o my-document.html
 Open `my-document.html` in any browser. The output is a single self-contained
 HTML5 file — no external assets — that mirrors the source document's fonts,
 heading scale, and colors, with the text carried over verbatim and all images
-dropped.
+dropped. Ruled tables are rebuilt as real `<table>` elements — including
+bullet lists inside cells and rows that continue across page breaks.
 
 ## 3. Useful options
 
@@ -71,3 +72,8 @@ headings may flatten the hierarchy — text content is never affected.
 **Text looks correct but styling is off.** Heuristic failures only affect
 styling, never text content. If the document's typography is highly
 unconventional, try `--style default` for a clean built-in theme.
+
+**A table came out as loose paragraphs.** Table detection needs ruling lines
+(the PyMuPDF `find_tables()` "lines" strategy). Borderless, whitespace-only
+tables are not reconstructed yet — their text still appears, in reading
+order, as regular paragraphs.

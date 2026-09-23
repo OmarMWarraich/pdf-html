@@ -131,7 +131,12 @@ def _render_block(block: Block, body_size: float, body_color: int) -> str:
         rows: list[str] = []
         for r, row in enumerate(block.rows):
             cell_tag = "th" if r < block.header_rows else "td"
-            cells = "".join(f"<{cell_tag}>{_escape(c)}</{cell_tag}>" for c in row)
+            cells = "".join(
+                f"<{cell_tag}>"
+                + "".join(_render_block(b, body_size, body_color) for b in cell.blocks)
+                + f"</{cell_tag}>"
+                for cell in row
+            )
             rows.append(f"<tr>{cells}</tr>")
         return f"<table>{''.join(rows)}</table>"
     if isinstance(block, Callout):
@@ -177,7 +182,9 @@ def _css(doc: Document, style: str) -> str:
     rules.append(".align-right { text-align: right; }")
     rules.append(".callout { border-left: 3px solid var(--accent); padding: .5rem 1rem; "
                  "background: color-mix(in srgb, var(--accent) 8%, transparent); }")
-    rules.append("table { border-collapse: collapse; } th, td { padding: .25rem .75rem; }")
+    rules.append("table { border-collapse: collapse; margin: 1rem 0; } "
+                 "th, td { padding: .25rem .75rem; border: 1px solid #ccc; "
+                 "vertical-align: top; text-align: left; }")
     rules.append("section.sheet { page-break-after: always; border-bottom: 1px dashed #ccc; }")
     return "\n".join(rules)
 

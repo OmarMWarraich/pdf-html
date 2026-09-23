@@ -13,14 +13,17 @@ from collections.abc import Sequence
 from .ast import Block, ListBlock, ListItem, Paragraph, Span
 
 # Bullet glyphs, decimal/alpha/roman enumerations. Broad on purpose: the
-# geometric indent (handled here) — not the glyph — decides nesting.
+# geometric indent (handled here) — not the glyph — decides nesting. Solid
+# bullet glyphs are often separate PDF spans with no literal space after
+# them, so whitespace is optional there only.
 LIST_MARKER = re.compile(
     r"^\s*(?P<marker>"
-    r"[•◦▪·–—\-*o]"
-    r"|\d{1,3}[.)]"
-    r"|[a-zA-Z][.)]"
-    r"|[ivxlIVXL]+[.)]"
-    r")\s+"
+    r"[•◦▪·](?=\s*\S)"
+    r"|[–—\-*o](?=\s+\S)"
+    r"|\d{1,3}[.)](?=\s+\S)"
+    r"|[a-zA-Z][.)](?=\s+\S)"
+    r"|[ivxlIVXL]+[.)](?=\s+\S)"
+    r")\s*"
 )
 
 _ORDERED_MARKER = re.compile(r"^\s*(\d{1,3}[.)]|[a-zA-Z][.)]|[ivxlIVXL]+[.)])\s*$")
