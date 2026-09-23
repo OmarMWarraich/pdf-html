@@ -1,6 +1,6 @@
 [project]
 name = "pdf-html"
-version = "0.1.0"
+version = "0.1.1"
 description = "Early-stage geometry-first PDF-to-HTML converter for text-based PDFs — verbatim text, source typography, zero images."
 readme = "README.md"
 requires-python = ">=3.10"
