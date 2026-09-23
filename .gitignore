@@ -225,5 +225,20 @@ REQS.md
 .github/*instructions.md
 
 tests/fixtures/*.html
+# Only the deterministic generated fixtures are committed; ad-hoc test PDFs
+# (often copyrighted course material) stay local.
 tests/fixtures/*.pdf
+tests/fixtures/*.PDF
+!tests/fixtures/report.pdf
+!tests/fixtures/two_column.pdf
+!tests/fixtures/slides.pdf
+!tests/fixtures/brochure.pdf
+!tests/fixtures/table.pdf
 chain*
+
+# Local conversion artifacts at repo root (often copyrighted sources — never commit)
+/*.pdf
+/*.html
+
+# macOS
+.DS_Store
