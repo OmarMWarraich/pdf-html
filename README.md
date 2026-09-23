@@ -35,6 +35,23 @@
 - 🔒 **Text is verbatim** — never summarized, reworded, or reordered within a block
 - 🚫 **No images, ever** — image content is dropped by design; text alone carries the document
 
+## 🧭 Early-stage scope
+
+This is an **early-stage, geometry-first conversion tool for text-based PDFs**. It is designed to be reliable and deterministic where the PDF has a usable text layer, but it is not a universal OCR-first converter for scanned documents, forms, or arbitrary image-heavy PDFs.
+
+### What it does well
+
+- text-based PDFs with real text layers
+- styled HTML with verbatim text
+- heading hierarchy, lists, and multi-column layout reconstruction
+- ruled table reconstruction with cell-aware content flow
+
+### What it does not yet do well
+
+- OCR and scanned-document support are planned as separate, opt-in paths
+- arbitrary image-heavy PDFs or forms with weak text layers
+- pixel-perfect visual reconstruction of every layout edge case
+
 ## ⚡ Quick start
 
 ```bash
