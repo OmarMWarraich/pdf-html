@@ -55,14 +55,17 @@ This is an **early-stage, geometry-first conversion tool for text-based PDFs**. 
 ## ⚡ Quick start
 
 ```bash
-# install (Python 3.10+)
-uv pip install .        # or: pip install .
+# install from PyPI (Python 3.10+)
+pip install pdf-html
+# or: uv pip install pdf-html
 
 # convert
 pdf-html report.pdf -o report.html
 
 # open report.html in any browser — no external assets needed
 ```
+
+If you are working from a cloned repository instead of the published package, install the local checkout with `pip install -e .` or `uv pip install -e .`.
 
 ## 🖥️ CLI reference
 
