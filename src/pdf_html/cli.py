@@ -1,8 +1,8 @@
 """Command-line interface.
 
 pdf2html INPUT.pdf -o out.html [--extractor pymupdf|pdftotext]
-    [--style auto|default] [--paginate] [--no-callouts] [--keep-headers]
-    [--allow-scanned]
+    [--style auto|default] [--paginate] [--no-tables] [--no-callouts]
+    [--keep-headers] [--allow-scanned]
 """
 
 from __future__ import annotations
@@ -56,6 +56,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Wrap each PDF page in a <section class='sheet'> (off by default).",
     )
     parser.add_argument(
+        "--no-tables",
+        action="store_true",
+        help=(
+            "Disable table reconstruction; table text flows as regular "
+            "paragraphs in reading order (tables are on by default)."
+        ),
+    )
+    parser.add_argument(
         "--no-callouts",
         action="store_true",
         help="Disable callout detection (accepted; callouts not yet implemented).",
@@ -95,6 +103,9 @@ def convert(args: argparse.Namespace) -> Document:
 
     pages = result.pages if args.keep_headers else strip_headers_footers(result.pages)
     profile = profile_styles(pages)
+    if args.no_tables:
+        for page in pages:
+            page.tables = []  # reconstruct_page falls back to flow classification
 
     # TODO: callout detection (--no-callouts) once callout_detector lands.
     doc = Document(

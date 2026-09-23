@@ -37,3 +37,32 @@ def test_single_column_top_to_bottom(tmp_path):
     result = PyMuPDFExtractor().extract(str(path))
     seq = [s.text for s in order_spans(result.pages[0])]
     assert seq == ["top", "middle", "bottom"]
+
+
+def test_indented_list_page_is_not_a_card_grid(tmp_path):
+    """Narrow lead-ins + wide wrapped body lines must stay one column.
+
+    Regression: the card-column fallback used to split bullet lead-ins from
+    their descriptions, reordering the page column-major.
+    """
+    path = tmp_path / "list.pdf"
+    doc = pymupdf.open()
+    page = doc.new_page(width=612, height=792)
+    for i in range(4):
+        y = 120 + i * 60
+        page.insert_text((90, y), "•", fontsize=11)
+        page.insert_text((108, y), f"Item {i}.", fontsize=11)
+        page.insert_text((190, y), f"Wide description for item {i} of the list.", fontsize=11)
+        page.insert_text((108, y + 15), f"Wrapped continuation line {i} spanning most of the page width here.", fontsize=11)
+    doc.save(path)
+    doc.close()
+
+    result = PyMuPDFExtractor().extract(str(path))
+    seq = [s.text for s in order_spans(result.pages[0])]
+    # Strict top-to-bottom order: every item's texts precede the next item's.
+    positions = [seq.index(f"Item {i}.") for i in range(4)]
+    assert positions == sorted(positions)
+    for i in range(4):
+        assert seq.index(f"Item {i}.") < seq.index(
+            f"Wrapped continuation line {i} spanning most of the page width here."
+        )

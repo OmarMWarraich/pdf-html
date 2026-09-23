@@ -25,6 +25,10 @@ EDGE_ROUNDING_PT = 1.0
 # multiple of the median span size on that page.
 SAME_LINE_Y_TOLERANCE = 0.5
 
+# Card-column detection is rejected when more than this fraction of spans
+# straddle a proposed interior column edge (real grids have none).
+CARD_STRADDLE_MAX_FRACTION = 0.10
+
 
 def _column_edges(spans: Sequence[Span], page_width: float) -> list[float]:
     """Cluster span x-edges into column boundaries, sorted left to right.
@@ -83,6 +87,18 @@ def _card_column_edges(spans: Sequence[Span], page_width: float) -> list[float]:
     edges: list[float] = [min(s.bbox[0] for s in spans)]
     for i in split_indices:
         edges.append((centers[i] + centers[i + 1]) / 2.0)
+
+    # A true card grid has no spans crossing a column boundary. If more than
+    # a small fraction straddle an interior edge (indented lists, wrapped
+    # body text), this is a single-column page, not a grid.
+    interior = edges[1:]
+    straddlers = sum(
+        1
+        for s in spans
+        if any(s.bbox[0] < e - EDGE_ROUNDING_PT and s.bbox[2] > e + EDGE_ROUNDING_PT for e in interior)
+    )
+    if straddlers > len(spans) * CARD_STRADDLE_MAX_FRACTION:
+        return [0.0]
     return edges
 
 

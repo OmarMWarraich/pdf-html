@@ -178,7 +178,7 @@ def _css(doc: Document, style: str) -> str:
                  "max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }")
     for i, size in enumerate(heading_sizes[:6], start=1):
         rules.append(f"h{i} {{ font-size: var(--h{i}); color: var(--accent); }}")
-    rules.append(".align-center { text-align: center; }")
+    # rules.append(".align-center { text-align: center; }")
     rules.append(".align-right { text-align: right; }")
     rules.append(".callout { border-left: 3px solid var(--accent); padding: .5rem 1rem; "
                  "background: color-mix(in srgb, var(--accent) 8%, transparent); }")

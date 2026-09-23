@@ -1,0 +1,44 @@
+---
+config:
+  theme: base
+  flowchart:
+    curve: cardinal
+  themeVariables:
+    background: "#fafafa"
+    primaryColor: "#dae8fc"
+    primaryTextColor: "#1a1a1a"
+    primaryBorderColor: "#6c8ebf"
+    lineColor: "#666666"
+    secondaryColor: "#fff2cc"
+    tertiaryColor: "#d5e8d4"
+---
+flowchart LR
+    A["📄 PDF"] --> B["Extractor<br/>(spans + font metadata)"]
+    B --> C["Header/Footer<br/>stripping"]
+    C --> D["Style Profiler<br/>(body size, h1–h6 tiers, palette)"]
+    D --> E["Table<br/>Reconstructor"]
+    D --> F["Reading Order<br/>(column clustering)"]
+    E --> G["Structure Detector<br/>(headings · paragraphs · lists)"]
+    F --> G
+    G --> H["List Parser<br/>(nested ul/ol)"]
+    H --> I["AST<br/>(Document → Page → Blocks)"]
+    I --> J["Renderer<br/>(semantic HTML5 + inline CSS)"]
+    J --> K["🌐 out.html"]
+
+    classDef default fill:#f5f5f5,stroke:#999,stroke-width:1px,color:#333
+    classDef input fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#333
+    classDef extract fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px,color:#333
+    classDef analysis fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#333
+    classDef structure fill:#e1d5e7,stroke:#9673a6,stroke-width:2px,color:#333
+    classDef render fill:#ffe6cc,stroke:#d79b00,stroke-width:2px,color:#333
+    classDef output fill:#f8cecc,stroke:#b85450,stroke-width:3px,color:#333
+
+    class A input
+    class B,C extract
+    class D,E,F analysis
+    class G,H,I structure
+    class J render
+    class K output
+
+    linkStyle default stroke:#999,stroke-width:1px
+    linkStyle 9,10 stroke:#d79b00,stroke-width:2px

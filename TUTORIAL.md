@@ -50,6 +50,13 @@ Preserve page boundaries as `<section class="sheet">` wrappers:
 pdf2html my-document.pdf -o out.html --paginate
 ```
 
+Ruled tables are reconstructed as `<table>` elements by default — no flag
+needed. To compare against the old flat output, disable them:
+
+```bash
+pdf2html my-document.pdf -o out.html --no-tables
+```
+
 ## 4. Real examples
 
 Convert the bundled fixture documents (after `uv sync`):
@@ -57,6 +64,7 @@ Convert the bundled fixture documents (after `uv sync`):
 ```bash
 uv run pdf2html tests/fixtures/report.pdf -o /tmp/report.html
 uv run pdf2html tests/fixtures/two_column.pdf -o /tmp/two_column.html
+uv run pdf2html tests/fixtures/table.pdf -o /tmp/table.html
 ```
 
 ## 5. Troubleshooting
