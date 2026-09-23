@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="logo.png" alt="pdf-html logo" width="120" height="120" />
+<img src="https://raw.githubusercontent.com/OmarMWarraich/pdf-html/main/logo.png" alt="pdf-html logo" width="120" height="120" />
 
 # pdf-html
 
