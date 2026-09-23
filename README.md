@@ -1,8 +1,10 @@
 <div align="center">
 
-# 📄 ✨ pdf-html
+<img src="logo.png" alt="pdf-html logo" width="120" height="120" />
 
-**Convert any text-based PDF into beautiful, self-contained HTML — verbatim text, source typography, zero images.**
+# pdf-html
+
+**Early-stage geometry-first PDF → HTML converter for text-based PDFs — verbatim text, source typography, zero images.**
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyMuPDF](https://img.shields.io/badge/powered%20by-PyMuPDF-orange)](https://pymupdf.readthedocs.io/)
@@ -19,7 +21,10 @@
 
 ## 🎯 What it does
 
-`pdf-html` reads a text-based PDF and rebuilds it as a **single self-contained HTML5 file** that mirrors the source document's look and structure:
+`pdf-html` is an **early-stage, geometry-first PDF-to-HTML converter** for **text-based PDFs**. It rebuilds the document as a **single self-contained HTML5 file** that mirrors the source document's look and structure:
+
+- ✅ Best for: text-based PDFs with real text layers, headings, lists, tables, and multi-column layouts
+- ⚠️ Not a universal OCR-first converter: scanned/image-heavy PDFs still need an OCR pre-pass or a dedicated workflow
 
 - 🏷️ **Heading hierarchy** — font-size tiers become real `<h1>`–`<h6>`
 - 🎨 **Typography & color** — the page CSS is derived from the document's own fonts, sizes, and palette
@@ -162,9 +167,9 @@ Every PDF converter picks a trade-off. `pdf-html` optimizes for **semantic, refl
 | [unstructured](https://pypi.org/project/unstructured/) | Element JSON for RAG | ⚠️ element types | ❌ | ⚠️ | heavy optional deps |
 | Adobe PDF Services | Structured JSON/HTML | ✅ | ⚠️ | ❌ | cloud API, paid |
 
-**When to choose pdf-html** — you want a *readable, reflowable* document that still looks like the original, produced offline, reproducibly, with text you can trust character-for-character (tables included, even across page breaks).
+**When to choose pdf-html** — you want a *readable, reflowable* document that still looks like the original, produced offline, reproducibly, with text you can trust character-for-character (text-based PDFs, tables included, even across page breaks).
 
-**When to choose something else** — you need pixel-perfect visual replicas (pdf2htmlEX), scanned-document OCR and formula recognition (marker, docling), or RAG-oriented element JSON (unstructured).
+**When to choose something else** — you need pixel-perfect visual replicas (pdf2htmlEX), OCR-heavy scanned document conversion (marker, docling), or RAG-oriented element JSON (unstructured).
 
 ## 🧪 Testing
 
@@ -221,6 +226,8 @@ Contributions welcome! Ground rules:
 
 ## 🚀 Releases
 
+This project is intentionally published as an **early-stage v0.x** tool: the core pipeline is solid for text-based PDFs, but it is not a universal PDF converter for scanned pages, forms, or OCR-heavy corpora.
+
 ```bash
 # 1. bump version in pyproject.toml
 uv build        # 2. artifacts land in dist/
@@ -235,7 +242,7 @@ MIT — see [pyproject.toml](pyproject.toml).
 
 <div align="center">
 
-**Built with 🐍 + 📐 — geometry over guesswork.**
+**Built with 🐍 + 📐 — early-stage geometry over guesswork.**
 
 *If this project helped you, consider giving it a ⭐!*
 
